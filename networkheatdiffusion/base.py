@@ -4,7 +4,6 @@ import logging
 import requests
 import networkx
 import numpy
-from numpy import array
 from scipy.sparse import csc_matrix
 from scipy.sparse.linalg import expm, expm_multiply
 from ndex2.nice_cx_network import NiceCXNetwork
@@ -26,7 +25,12 @@ class HeatDiffusion(object):
     """
 
     DEFAULT_SERVICE_ENDPOINT = 'http://v3.heat-diffusion.cytoscape.io'
+    DEFAULT_INPUT = 'diffusion_input'
     DEFAULT_OUTPUT_PREFIX = 'diffusion_output'
+    DEFAULT_HEAT_SUFFIX = '_heat'
+    DEFAULT_RANK_SUFFIX = '_rank'
+    DEFAULT_HEAT = DEFAULT_OUTPUT_PREFIX + DEFAULT_HEAT_SUFFIX
+    DEFAULT_RANK = DEFAULT_OUTPUT_PREFIX + DEFAULT_RANK_SUFFIX
 
     def __init__(self, service_endpoint=None, connect_timeout=360):
         """
@@ -46,17 +50,41 @@ class HeatDiffusion(object):
                          self._service_endpoint)
 
     def _create_sparse_matrix(self, network, normalize=False):
+        """
+
+        :param network:
+        :param normalize:
+        :return:
+        """
         if normalize:
             return csc_matrix(networkx.normalized_laplacian_matrix(network))
         else:
             return csc_matrix(networkx.laplacian_matrix(network))
 
     def _diffuse(self, matrix, heat_array, time):
+        """
+
+        :param matrix:
+        :param heat_array:
+        :param time:
+        :return:
+        """
         return expm_multiply(-matrix, heat_array,
                           start=0, stop=time,
                           endpoint=True)[-1]
 
     def _find_heat(self, network, heat_key):
+        """
+        Gets node heat values from 'network' passed in
+
+        :param network: network with nodes that contain 'heat_key' attribute
+        :type network: :py:class:`networkx.Graph`
+        :param heat_key: name of heat key ie diffusion_input
+        :type heat_key: str
+        :return: array of heat values in order of index values
+                 of nodes in network
+        :rtype: :py:class:`numpy.ndarray`
+        """
         heat_list = []
         found_heat = False
         for node_id in network.nodes():
@@ -67,22 +95,49 @@ class HeatDiffusion(object):
             raise HeatDiffusionError('No input heat found')
         return numpy.array(heat_list)
 
-    def _add_heat(self, network, output_key, heat_array):
+    def _add_heat(self, network, heat_array):
+        """
+        Given a 'network' and an array of heats in 'heat_array' this
+        method returns a :py:class:`tuple` with two :py:class:`dict`
+        objects.
 
+        The first contains node heats with key set to
+        node id and value being the heat.
+
+        The second contains node ranks with key set to
+        node id and value being the rank where 0 is best
+        rank and set to node with largest heat value.
+
+        :param network:
+        :type network: :py:class:`networkx.Graph`
+        :param heat_array: array of network node heats ordered by nodes
+                           in 'network'
+        :type heat_array: :py:class:`numpy.ndarray`
+        :return: (node heat as :py:class:`dict` with node id as key,
+                  node rank as :py:class:`dict` with node id as key)
+        :rtype: tuple
+        """
         node_heat = {node_id: heat_array[i] for i, node_id in enumerate(network.nodes())}
         sorted_nodes = sorted(node_heat.items(), key=lambda x: x[1], reverse=True)
         node_rank = {node_id: i for i, (node_id, _) in enumerate(sorted_nodes)}
+
         return node_heat, node_rank
 
     def _add_diffusion_dict_to_network(self, cxnetwork, node_heat, node_rank,
-                                       heat_col_name='diffusion_output_heat',
-                                       rank_col_name='diffusion_output_rank'):
+                                       heat_col_name=DEFAULT_HEAT,
+                                       rank_col_name=DEFAULT_RANK):
         """
+        Adds heat and rank as node attributes to 'cxnetwork' network
 
         :param cxnetwork:
-        :param node_heat:
-        :param node_rank:
-        :return:
+        :type cxnetwork: :py:class:`ndex2.nice_cx_network.NiceCXNetwork`
+        :param node_heat: :py:class:`dict` where key is node id and value is
+                          heat for that node
+        :type node_heat: dict
+        :param node_rank: :py:class:`dict` where key is node id and value is
+                          rank for that node
+        :type node_rank: dict
+        :return: 'cxnetwork' passed in
         """
         for node_id, node_obj in cxnetwork.get_nodes():
             if node_id in node_heat:
@@ -101,8 +156,10 @@ class HeatDiffusion(object):
 
     def run_diffusion(self, cxnetwork, time_param=0.5,
                       normalize_laplacian=False,
-                      input_col_name='diffusion_input',
-                      output_prefix='diffusion_output'):
+                      input_col_name=DEFAULT_INPUT,
+                      output_prefix=DEFAULT_OUTPUT_PREFIX,
+                      via_service=False,
+                      service_read_timeout=360):
         """
 
         :param cxnetwork:
@@ -113,21 +170,26 @@ class HeatDiffusion(object):
         :param service_read_timeout:
         :return:
         """
+        if via_service is not None and via_service is True:
+            return self._run_diffusion_via_service(cxnetwork, time_param=time_param,
+                                                   normalize_laplacian=normalize_laplacian,
+                                                   input_col_name=input_col_name,
+                                                   output_prefix=output_prefix,
+                                                   service_read_timeout=service_read_timeout)
         netx_fac = DefaultNetworkXFactory()
         netx_graph = netx_fac.get_graph(cxnetwork, networkx_graph=networkx.MultiGraph())
         matrix = self._create_sparse_matrix(netx_graph, normalize_laplacian)
         heat_array = self._find_heat(netx_graph, input_col_name)
         diffused_heat_array = self._diffuse(matrix, heat_array, time_param)
         node_heat, node_rank = self._add_heat(netx_graph,
-                                              output_prefix,
                                               diffused_heat_array)
         return self._add_diffusion_dict_to_network(cxnetwork, node_heat, node_rank)
 
-    def run_diffusion_via_service(self, cxnetwork, time_param=None,
-                                  normalize_laplacian=None,
-                                  input_col_name=None,
-                                  output_prefix=None,
-                                  service_read_timeout=360):
+    def _run_diffusion_via_service(self, cxnetwork, time_param=None,
+                                   normalize_laplacian=None,
+                                   input_col_name=None,
+                                   output_prefix=None,
+                                   service_read_timeout=360):
         """
         Runs diffusion on 'network' passed in, storing results in two new node
         attributes named by the values of 'diffusion_output_rank_col_name' and
@@ -227,10 +289,10 @@ class HeatDiffusion(object):
             params['time'] = time_param
         if normalize_laplacian is not None and normalize_laplacian is True:
             params['normalize_laplacian'] = True
-        if input_col_name is not None and input_col_name != 'diffusion_input':
+        if input_col_name is not None and input_col_name != HeatDiffusion.DEFAULT_INPUT:
             params['input_attribute_name'] = input_col_name
 
-        if output_prefix is not None and output_prefix != 'diffusion_output':
+        if output_prefix is not None and output_prefix != HeatDiffusion.DEFAULT_OUTPUT_PREFIX:
             params['output_attribute_name'] = output_prefix
 
         return params
@@ -248,8 +310,8 @@ class HeatDiffusion(object):
             o_prefix = HeatDiffusion.DEFAULT_OUTPUT_PREFIX
         else:
             o_prefix = diffusion_output_prefix
-        rank_col = o_prefix + '_rank'
-        heat_col = o_prefix + '_heat'
+        rank_col = o_prefix + HeatDiffusion.DEFAULT_RANK_SUFFIX
+        heat_col = o_prefix + HeatDiffusion.DEFAULT_HEAT_SUFFIX
 
         LOGGER.debug('Appending diffusion output to network')
         for aspect in diff_res['data']:
@@ -272,9 +334,16 @@ class HeatDiffusion(object):
     def add_seed_nodes_by_node_name(cxnetwork, seed_nodes=None,
                                     diffusion_col_name=None):
         """
+        Adds seed nodes by node name. This is done by adding a
+        node attribute named by 'diffusion_col_name' :parameter
+        or if that is `None` then `HeatDiffusion.DEFAULT_INPUT` is
+        used
 
-        :param cxnetwork:
-        :param seednodes:
+        :param cxnetwork: network to update
+        :type cxnetwork: :py:class:`ndex2.nice_cx_network.NiceCXNetwork`
+        :param seednodes: if this is a :py:func:`list` then the value of the node
+                          attribute is set to `1.0`. If :py:func:`dict` then list of node names or dict of node names
+        :type seed_nodes: list or dict
         :param diffusion_col_name:
         :return:
         """
@@ -282,7 +351,7 @@ class HeatDiffusion(object):
             raise HeatDiffusionError('Input network cannot be None')
 
         if diffusion_col_name is None:
-            diffusion_col_name = 'diffusion_input'
+            diffusion_col_name = HeatDiffusion.DEFAULT_INPUT
 
         if isinstance(seed_nodes, list) is True:
             seed_nodes_list = seed_nodes
@@ -324,9 +393,9 @@ class HeatDiffusion(object):
         :rtype: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         """
         if rank_col is None:
-            rank_col = HeatDiffusion.DEFAULT_OUTPUT_PREFIX + '_rank'
+            rank_col = HeatDiffusion.DEFAULT_RANK
         if heat_col is None:
-            heat_col = HeatDiffusion.DEFAULT_OUTPUT_PREFIX + '_heat'
+            heat_col = HeatDiffusion.DEFAULT_HEAT
 
         nodes_to_remove = set()
         for node_id, node_obj in cx_network.get_nodes():
