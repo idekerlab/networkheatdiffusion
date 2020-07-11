@@ -25,13 +25,13 @@ requirements = [
 ]
 
 test_requirements = [
-    # TODO: put package test requirements here
+    'requests-mock',
 ]
 
 setup(
     name='networkheatdiffusion',
     version=version,
-    description="Package to enable invocation of Heat Diffusion service",
+    description="Package to run Heat Diffusion locally or via service",
     long_description=readme + '\n\n' + history,
     author="Chris Churas",
     author_email='churas.camera@gmail.com',
