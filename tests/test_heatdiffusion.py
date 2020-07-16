@@ -105,6 +105,42 @@ class TestHeatDiffusion(unittest.TestCase):
             n_attr = res_cx.get_node_attribute(node_id, 'diffusion_output_heat')
             self.assertIsNotNone(n_attr)
 
+    def test_extract_diffused_subnetwork_by_rank(self):
+        net_cx = ndex2.create_nice_cx_from_file(TestHeatDiffusion.TEST_NETWORK)
+        diffuser = HeatDiffusion()
+        diffuser.add_seed_nodes_by_node_name(net_cx, seed_nodes=['E', 'M'])
+        res_cx = diffuser.run_diffusion(net_cx)
+        self.assertEqual(359, len(res_cx.get_nodes()))
+        self.assertEqual(481, len(res_cx.get_edges()))
+        diffuser.extract_diffused_subnetwork_by_rank(res_cx, max_rank=5,
+                                                     min_heat=0.0)
+        self.assertEqual(6, len(res_cx.get_nodes()))
+        self.assertEqual(5, len(res_cx.get_edges()))
+
+    def test_extract_diffused_subnetwork_by_rank_no_edge_attributes(self):
+        net_cx = ndex2.create_nice_cx_from_file(TestHeatDiffusion.TEST_NETWORK)
+
+        for edge_id, edge_obj in net_cx.get_edges():
+            e_attributes = net_cx.get_edge_attributes(edge_id)
+            if e_attributes is None:
+                continue
+            e_attrib_names = set()
+            for e_attr in e_attributes:
+                e_attrib_names.add(e_attr['n'])
+            for e_name in e_attrib_names:
+                net_cx.remove_edge_attribute(edge_id, e_name)
+            e_attrib_names.clear()
+        diffuser = HeatDiffusion()
+        diffuser.add_seed_nodes_by_node_name(net_cx, seed_nodes=['E', 'M'])
+        res_cx = diffuser.run_diffusion(net_cx)
+        self.assertEqual(359, len(res_cx.get_nodes()))
+        self.assertEqual(481, len(res_cx.get_edges()))
+        diffuser.extract_diffused_subnetwork_by_rank(res_cx, max_rank=5,
+                                                     min_heat=0.0)
+        self.assertEqual(6, len(res_cx.get_nodes()))
+        self.assertEqual(5, len(res_cx.get_edges()))
+
+
     def test_add_heat(self):
         my_net = networkx.MultiGraph()
         my_net.add_nodes_from([1, 2, 3])

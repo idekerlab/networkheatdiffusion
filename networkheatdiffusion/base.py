@@ -88,9 +88,9 @@ class HeatDiffusion(object):
         heat_list = []
         found_heat = False
         for node_id in network.nodes():
-            if heat_key in network.node[node_id]:
+            if heat_key in network.nodes[node_id]:
                 found_heat = True
-            heat_list.append(network.node[node_id].get(heat_key, 0))
+            heat_list.append(network.nodes[node_id].get(heat_key, 0))
         if not found_heat:
             raise HeatDiffusionError('No input heat found')
         return numpy.array(heat_list)
@@ -417,19 +417,23 @@ class HeatDiffusion(object):
 
         for edge_id in edges_to_remove:
             e_attrib_names = set()
-            for e_attr in cx_network.get_edge_attributes(edge_id):
-                e_attrib_names.add(e_attr['n'])
-            for e_name in e_attrib_names:
-                cx_network.remove_edge_attribute(edge_id, e_name)
+            e_attributes = cx_network.get_edge_attributes(edge_id)
+            if e_attributes is not None:
+                for e_attr in e_attributes:
+                    e_attrib_names.add(e_attr['n'])
+                for e_name in e_attrib_names:
+                    cx_network.remove_edge_attribute(edge_id, e_name)
             cx_network.remove_edge(edge_id)
             e_attrib_names.clear()
 
         for node_id in nodes_to_remove:
             n_attrib_names = set()
-            for n_attr in cx_network.get_node_attributes(node_id):
-                n_attrib_names.add(n_attr['n'])
-            for n_name in n_attrib_names:
-                cx_network.remove_node_attribute(node_id, n_name)
+            n_attributes = cx_network.get_node_attributes(node_id)
+            if n_attributes is not None:
+                for n_attr in n_attributes:
+                    n_attrib_names.add(n_attr['n'])
+                for n_name in n_attrib_names:
+                    cx_network.remove_node_attribute(node_id, n_name)
             n_attrib_names.clear()
             cx_network.remove_node(node_id)
 
