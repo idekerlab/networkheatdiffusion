@@ -161,14 +161,39 @@ class HeatDiffusion(object):
                       via_service=False,
                       service_read_timeout=360):
         """
+        Runs diffusion annotating the 'cxnetwork' passed in with
+        new node attributes 'outputprefix'_heat and 'output_prefix'_rank
+        added to 'cxnetwork' in place.
 
-        :param cxnetwork:
-        :param time_param:
-        :param normalize_laplacian:
-        :param input_col_name:
-        :param output_prefix:
-        :param service_read_timeout:
-        :return:
+        :param cxnetwork: network to run diffusion on
+        :type cxnetwork: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
+        :param time_param: stop time passed to :py:func:`scipy.sparse.linalg.expm_multiply`
+        :type time_param: int
+        :param normalize_laplacian: If `True`, will create a normalized
+                                    laplacian matrix for diffusion.
+                                    `None` denotes default of `False`
+        :type normalize_laplacian: bool
+        :param input_col_name: Name of node attribute that contains
+                               diffusion heat inputs which should
+                               be double values between `0.0` and
+                               `1.0` where `1.0` is maximum heat
+                               (seed) and 0.0 is minimum.
+                               `None` denotes default
+                               input column name of `diffusion_input`
+        :type input_col_name: str
+        :param output_prefix: Prefix name for diffusion output attached
+                              to each node. Each
+                              node will get <PREFIX>_rank and
+                              <PREFIX>_heat. `None` denotes
+                              default prefix of `diffusion_output`
+        :type output_prefix: str
+        :param via_service: if `True` run diffusion via remote service
+        :param service_read_timeout: Seconds to wait for a response
+                                     from service. Only used when 'via_service' is
+                                     set to `True`
+        :type service_read_timeout: int
+        :return: network passed in with diffusion columns added
+        :rtype: `:py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         """
         if via_service is not None and via_service is True:
             return self._run_diffusion_via_service(cxnetwork, time_param=time_param,
@@ -266,9 +291,15 @@ class HeatDiffusion(object):
     @staticmethod
     def _convert_attribute_values_to_strings(cx_as_list_of_dictionaries):
         """
+        The remote diffusion service expects all values in all attributes
+        aspects to be string values so this method converts those values
+        to strings
 
-        :param cx_as_list_of_dictionaries:
-        :return:
+        :param cx_as_list_of_dictionaries: NDEx CX data as a :py:class:`list` of
+                                           :py:class:`dict` objects
+        :type cx_as_list_of_dictionaries: list
+        :return: 'cx_as_list_of_dictionaries' updated
+        :rtype: list
         """
         LOGGER.debug('Converting values of all attributes to type string')
         for p in cx_as_list_of_dictionaries:
