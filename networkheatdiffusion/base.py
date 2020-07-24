@@ -332,6 +332,7 @@ class HeatDiffusion(object):
     def _append_diffusion_result_to_network(net_cx, diff_res,
                                             diffusion_output_prefix):
         """
+        updates network with diffusion results
 
         :param net_cx:
         :param diff_res:
@@ -352,12 +353,15 @@ class HeatDiffusion(object):
                 if n_attr['n'] == rank_col or n_attr['n'] == heat_col:
                     if n_attr['d'] == 'float':
                         n_type = 'double'
+                        val = float(n_attr['v'])
                     else:
                         n_type = n_attr['d']
+                        val = int(n_attr['v'])
                     net_cx.add_node_attribute(property_of=int(n_attr['po']),
                                               name=n_attr['n'],
-                                              values=n_attr['v'],
-                                              type=n_type)
+                                              values=val,
+                                              type=n_type,
+                                              overwrite=True)
         LOGGER.debug('Network updated')
         return net_cx
 
