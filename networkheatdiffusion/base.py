@@ -130,12 +130,14 @@ class HeatDiffusion(object):
         if correct_rank is True:
             node_rank = dict()
             rank = 0
-            prevheat = -100000.0
+            previous_heat = None
             for _, (node_id, heat) in enumerate(sorted_nodes):
+                if previous_heat is not None:
+                    if heat < previous_heat:
+                        rank += 1
                 node_rank[node_id] = rank
-                if prevheat != heat:
-                    rank += 1
-                prevheat = heat
+
+                previous_heat = heat
         else:
             node_rank = {node_id: i for i, (node_id, _) in enumerate(sorted_nodes)}
 
@@ -172,7 +174,7 @@ class HeatDiffusion(object):
                                              overwrite=True)
         return cxnetwork
 
-    def run_diffusion(self, cxnetwork, time_param=0.5,
+    def run_diffusion(self, cxnetwork, time_param=0.1,
                       normalize_laplacian=False,
                       input_col_name=DEFAULT_INPUT,
                       output_prefix=DEFAULT_OUTPUT_PREFIX,
