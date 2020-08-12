@@ -62,14 +62,12 @@ class TestIntegrationHeatDiffusion(unittest.TestCase):
         diffuser.add_seed_nodes_by_node_name(net_cx, seed_nodes=['E', 'M'])
         local_diffuse_cx = diffuser.run_diffusion(net_cx)
 
-        print('Getting dict for local diffusion')
         local_node_dict = self.get_dict_of_node_name_to_diffusion_rank(local_diffuse_cx)
 
         r2_cx = ndex2.create_nice_cx_from_file(TestIntegrationHeatDiffusion.TEST_NETWORK)
         diffuser.add_seed_nodes_by_node_name(r2_cx, seed_nodes=['E', 'M'])
         remote_diffuse_cx = diffuser.run_diffusion(r2_cx, via_service=True)
 
-        print('getting dict for remote diffusion')
         remote_node_dict = self.get_dict_of_node_name_to_diffusion_rank(remote_diffuse_cx)
 
         # Couple issues found
