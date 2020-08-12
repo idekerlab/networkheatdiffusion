@@ -153,7 +153,6 @@ class TestHeatDiffusion(unittest.TestCase):
         self.assertEqual(6, len(res_cx.get_nodes()))
         self.assertEqual(4, len(res_cx.get_edges()))
 
-
     def test_add_heat(self):
         my_net = networkx.MultiGraph()
         my_net.add_nodes_from([1, 2, 3])
