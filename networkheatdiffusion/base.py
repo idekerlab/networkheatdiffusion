@@ -95,7 +95,8 @@ class HeatDiffusion(object):
             raise HeatDiffusionError('No input heat found')
         return numpy.array(heat_list)
 
-    def _add_heat(self, network, heat_array):
+    def _add_heat(self, network, heat_array,
+                  correct_rank=False):
         """
         Given a 'network' and an array of heats in 'heat_array' this
         method returns a :py:class:`tuple` with two :py:class:`dict`
@@ -113,13 +114,30 @@ class HeatDiffusion(object):
         :param heat_array: array of network node heats ordered by nodes
                            in 'network'
         :type heat_array: :py:class:`numpy.ndarray`
+        :param correct_rank: If True, multiple nodes that have same heat
+                             will have same rank.
+        :type correct_rank: bool
         :return: (node heat as :py:class:`dict` with node id as key,
                   node rank as :py:class:`dict` with node id as key)
         :rtype: tuple
         """
         node_heat = {node_id: heat_array[i] for i, node_id in enumerate(network.nodes())}
         sorted_nodes = sorted(node_heat.items(), key=lambda x: x[1], reverse=True)
-        node_rank = {node_id: i for i, (node_id, _) in enumerate(sorted_nodes)}
+
+        # this is a little correction that differs from REST service
+        # where if multiple nodes have same heat value they are given
+        # the same rank
+        if correct_rank is True:
+            node_rank = dict()
+            rank = 0
+            prevheat = -100000.0
+            for _, (node_id, heat) in enumerate(sorted_nodes):
+                node_rank[node_id] = rank
+                if prevheat != heat:
+                    rank += 1
+                prevheat = heat
+        else:
+            node_rank = {node_id: i for i, (node_id, _) in enumerate(sorted_nodes)}
 
         return node_heat, node_rank
 
@@ -158,6 +176,7 @@ class HeatDiffusion(object):
                       normalize_laplacian=False,
                       input_col_name=DEFAULT_INPUT,
                       output_prefix=DEFAULT_OUTPUT_PREFIX,
+                      correct_rank=False,
                       via_service=False,
                       service_read_timeout=360):
         """
@@ -187,15 +206,26 @@ class HeatDiffusion(object):
                               <PREFIX>_heat. `None` denotes
                               default prefix of `diffusion_output`
         :type output_prefix: str
+        :param correct_rank: If True, multiple nodes that have same heat
+                             will have same rank. NOTE: This only works
+                             with local invocation of diffusion at the moment
+                             and will raise a
+                             :py:class:`~networkheatdiffusion.base.HeatDiffusionError`
+                             if set to True and invoked with `via_service` set to `True`
+        :type correct_rank: bool
         :param via_service: if `True` run diffusion via remote service
         :param service_read_timeout: Seconds to wait for a response
                                      from service. Only used when 'via_service' is
                                      set to `True`
         :type service_read_timeout: int
+        :raises HeatDiffusionError: If there is an error
         :return: network passed in with diffusion columns added
         :rtype: `:py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         """
         if via_service is not None and via_service is True:
+            if correct_rank is True:
+                raise HeatDiffusionError('correct_rank flag only works with local invocation'
+                                         'of diffusion')
             return self._run_diffusion_via_service(cxnetwork, time_param=time_param,
                                                    normalize_laplacian=normalize_laplacian,
                                                    input_col_name=input_col_name,
@@ -207,7 +237,7 @@ class HeatDiffusion(object):
         heat_array = self._find_heat(netx_graph, input_col_name)
         diffused_heat_array = self._diffuse(matrix, heat_array, time_param)
         node_heat, node_rank = self._add_heat(netx_graph,
-                                              diffused_heat_array)
+                                              diffused_heat_array, correct_rank=correct_rank)
         return self._add_diffusion_dict_to_network(cxnetwork, node_heat, node_rank)
 
     def _run_diffusion_via_service(self, cxnetwork, time_param=None,
