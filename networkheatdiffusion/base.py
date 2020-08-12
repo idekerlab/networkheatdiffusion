@@ -444,7 +444,9 @@ class HeatDiffusion(object):
     @staticmethod
     def extract_diffused_subnetwork_by_rank(cx_network, max_rank=None,
                                             rank_col=None, min_heat=None,
-                                            heat_col=None):
+                                            heat_col=None,
+                                            include_seeds=False,
+                                            seed_col=None):
         """
         Given a network 'cx_network' where diffusion has been run. This
         method extracts a sub network containing nodes that have a
@@ -455,7 +457,9 @@ class HeatDiffusion(object):
         :type cx_network: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         :param by_max_rank: Keep nodes with rank of this or lower
         :type by_max_rank: int
-        :param
+        :param include_seeds: If set to `True` also include any nodes where
+                             diffusion_input attribute is greater then 0.0
+        :type include_seeds: bool
         :return: cx_network with modifications applied in place
         :rtype: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         """
@@ -463,9 +467,16 @@ class HeatDiffusion(object):
             rank_col = HeatDiffusion.DEFAULT_RANK
         if heat_col is None:
             heat_col = HeatDiffusion.DEFAULT_HEAT
+        if seed_col is None:
+            seed_col = HeatDiffusion.DEFAULT_INPUT
 
         nodes_to_remove = set()
         for node_id, node_obj in cx_network.get_nodes():
+            if include_seeds is not None and include_seeds is True:
+                s_attr = cx_network.get_node_attribute(node_id, seed_col)
+                if s_attr is not None:
+                    if float(s_attr['v']) > 0.0:
+                        continue
             if max_rank is not None:
                 n_attr = cx_network.get_node_attribute(node_id, rank_col)
 
