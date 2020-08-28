@@ -163,6 +163,50 @@ class TestHeatDiffusion(unittest.TestCase):
         self.assertEqual({1: 2, 2: 3, 3: 1}, node_heat)
         self.assertEqual({2: 0, 1: 1, 3: 2}, node_rank)
 
+    def test_add_heat_with_correct_rank_true_no_equal_heats(self):
+        my_net = networkx.MultiGraph()
+        my_net.add_nodes_from([1, 2, 3])
+
+        diffuser = HeatDiffusion()
+        node_heat, node_rank = diffuser._add_heat(my_net,
+                                                  np.array([2, 3, 1]),
+                                                  correct_rank=True)
+        self.assertEqual({1: 2, 2: 3, 3: 1}, node_heat)
+        self.assertEqual({2: 0, 1: 1, 3: 2}, node_rank)
+
+    def test_add_heat_with_correct_rank_true_equal_heats(self):
+        my_net = networkx.MultiGraph()
+        my_net.add_nodes_from([1, 2, 3, 4])
+
+        diffuser = HeatDiffusion()
+        node_heat, node_rank = diffuser._add_heat(my_net,
+                                                  np.array([2, 3, 2, 1]),
+                                                  correct_rank=True)
+        self.assertEqual({1: 2, 2: 3, 3: 2, 4: 1}, node_heat)
+        self.assertEqual({1: 1, 2: 0, 3: 1, 4: 3}, node_rank)
+
+    def test_add_heat_with_correct_rank_true_all_equal_heats(self):
+        my_net = networkx.MultiGraph()
+        my_net.add_nodes_from([1, 2, 3, 4])
+
+        diffuser = HeatDiffusion()
+        node_heat, node_rank = diffuser._add_heat(my_net,
+                                                  np.array([2, 2, 2, 2]),
+                                                  correct_rank=True)
+        self.assertEqual({1: 2, 2: 2, 3: 2, 4: 2}, node_heat)
+        self.assertEqual({1: 0, 2: 0, 3: 0, 4: 0}, node_rank)
+
+    def test_add_heat_with_correct_rank_true_multiple_equals(self):
+        my_net = networkx.MultiGraph()
+        my_net.add_nodes_from([1, 2, 3, 4, 5, 6])
+
+        diffuser = HeatDiffusion()
+        node_heat, node_rank = diffuser._add_heat(my_net,
+                                                  np.array([3, 3, 5, 5, 7, 2]),
+                                                  correct_rank=True)
+        self.assertEqual({1: 3, 2: 3, 3: 5, 5: 5, 4: 5, 5: 7, 6: 2}, node_heat)
+        self.assertEqual({5: 0, 3: 1, 4: 1, 1: 3, 2: 3, 6: 5}, node_rank)
+
     def test_convert_attribute_values_to_strings_where_change_needed(self):
         net_cx = ndex2.nice_cx_network.NiceCXNetwork()
         node_id = net_cx.create_node('foo')

@@ -115,7 +115,9 @@ class HeatDiffusion(object):
                            in 'network'
         :type heat_array: :py:class:`numpy.ndarray`
         :param correct_rank: If True, multiple nodes that have same heat
-                             will have same rank.
+                             will have same rank. The next node that has
+                             a different heat will have a rank equal to the
+                             number of nodes before it
         :type correct_rank: bool
         :return: (node heat as :py:class:`dict` with node id as key,
                   node rank as :py:class:`dict` with node id as key)
@@ -130,14 +132,15 @@ class HeatDiffusion(object):
         if correct_rank is True:
             node_rank = dict()
             rank = 0
+            counter = 0
             previous_heat = None
             for _, (node_id, heat) in enumerate(sorted_nodes):
                 if previous_heat is not None:
                     if heat < previous_heat:
-                        rank += 1
+                        rank = counter
                 node_rank[node_id] = rank
-
                 previous_heat = heat
+                counter += 1
         else:
             node_rank = {node_id: i for i, (node_id, _) in enumerate(sorted_nodes)}
 
