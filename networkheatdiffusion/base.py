@@ -31,6 +31,7 @@ class HeatDiffusion(object):
     DEFAULT_RANK_SUFFIX = '_rank'
     DEFAULT_HEAT = DEFAULT_OUTPUT_PREFIX + DEFAULT_HEAT_SUFFIX
     DEFAULT_RANK = DEFAULT_OUTPUT_PREFIX + DEFAULT_RANK_SUFFIX
+    DEFAULT_DATA_TYPE = numpy.float64
 
     def __init__(self, service_endpoint=None, connect_timeout=360):
         """
@@ -57,9 +58,11 @@ class HeatDiffusion(object):
         :return:
         """
         if normalize:
-            return csc_matrix(networkx.normalized_laplacian_matrix(network))
+            return csc_matrix(networkx.normalized_laplacian_matrix(network),
+                              dtype=HeatDiffusion.DEFAULT_DATA_TYPE)
         else:
-            return csc_matrix(networkx.laplacian_matrix(network))
+            return csc_matrix(networkx.laplacian_matrix(network),
+                              dtype=HeatDiffusion.DEFAULT_DATA_TYPE)
 
     def _diffuse(self, matrix, heat_array, time):
         """
@@ -93,7 +96,7 @@ class HeatDiffusion(object):
             heat_list.append(network.nodes[node_id].get(heat_key, 0))
         if not found_heat:
             raise HeatDiffusionError('No input heat found')
-        return numpy.array(heat_list)
+        return numpy.array(heat_list, dtype=HeatDiffusion.DEFAULT_DATA_TYPE)
 
     def _add_heat(self, network, heat_array,
                   correct_rank=False):
