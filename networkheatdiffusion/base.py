@@ -169,13 +169,13 @@ class HeatDiffusion(object):
             if node_id in node_heat:
                 cxnetwork.add_node_attribute(property_of=node_id,
                                              name=heat_col_name,
-                                             values=node_heat[node_id],
+                                             values=str(node_heat[node_id]),
                                              type='double',
                                              overwrite=True)
             if node_id in node_rank:
                 cxnetwork.add_node_attribute(property_of=node_id,
                                              name=rank_col_name,
-                                             values=node_rank[node_id],
+                                             values=str(node_rank[node_id]),
                                              type='integer',
                                              overwrite=True)
         return cxnetwork
