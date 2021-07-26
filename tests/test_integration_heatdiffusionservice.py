@@ -80,8 +80,8 @@ class TestIntegrationHeatDiffusion(unittest.TestCase):
         self.assertEqual(local_node_dict['M'][0],
                          remote_node_dict['M'][0])
         for node_name in local_node_dict.keys():
-            self.assertAlmostEqual(local_node_dict[node_name][1],
-                             remote_node_dict[node_name][1], places=10)
+            self.assertAlmostEqual(float(local_node_dict[node_name][1]),
+                                   float(remote_node_dict[node_name][1]), places=10)
 
 
 if __name__ == '__main__':
