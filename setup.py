@@ -17,11 +17,11 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'ndex2',
-    'networkx',
+    'ndex2>=3.4.0,<4.0.0',
+    'networkx>=2.5',
     'requests',
-    'scipy',
-    'numpy'
+    'scipy>=1.7.0',
+    'numpy>=1.21.1'
 ]
 
 test_requirements = [
@@ -43,7 +43,7 @@ setup(
                  'networkheatdiffusion'},
     include_package_data=True,
     install_requires=requirements,
-    license="BSD license",
+    license="MIT license",
     zip_safe=False,
     keywords='networkheatdiffusion',
     classifiers=[
