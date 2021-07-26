@@ -5,7 +5,7 @@ import requests
 import networkx
 import numpy
 from scipy.sparse import csc_matrix
-from scipy.sparse.linalg import expm, expm_multiply
+from scipy.sparse.linalg import expm_multiply
 from ndex2.nice_cx_network import NiceCXNetwork
 from ndex2.nice_cx_network import DefaultNetworkXFactory
 
@@ -36,6 +36,7 @@ class HeatDiffusion(object):
     def __init__(self, service_endpoint=None, connect_timeout=360):
         """
         Constructor
+
         :param service_endpoint: URL for making requests to diffusion service
         :type service_endpoint: str
         :param connect_timeout: timeout in seconds to wait for connection to service
@@ -391,10 +392,10 @@ class HeatDiffusion(object):
                 if n_attr['n'] == rank_col or n_attr['n'] == heat_col:
                     if n_attr['d'] == 'float':
                         n_type = 'double'
-                        val = float(n_attr['v'])
+                        val = n_attr['v']
                     else:
                         n_type = n_attr['d']
-                        val = int(n_attr['v'])
+                        val = n_attr['v']
                     net_cx.add_node_attribute(property_of=int(n_attr['po']),
                                               name=n_attr['n'],
                                               values=val,
