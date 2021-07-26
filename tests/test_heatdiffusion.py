@@ -62,7 +62,6 @@ class TestHeatDiffusion(unittest.TestCase):
 
         res_array = diffuser._create_sparse_matrix(my_net,
                                                    normalize=True).toarray()
-        print(res_array.shape)
         self.assertTrue(np.isclose(np.array([1, -0.70710678, -0.70710678]),
                                    res_array[0]).all())
 
@@ -253,7 +252,6 @@ class TestHeatDiffusion(unittest.TestCase):
         self.assertEqual({'time': 0.5,
                           'input_attribute_name': 'inputcol',
                           'output_attribute_name': 'outputcol'}, res)
-
 
 
 if __name__ == '__main__':
