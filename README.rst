@@ -53,11 +53,11 @@ Dependencies
 **Compatibility**
 -----------------------
 
-Python 3+
+Python 3.6+
 
 .. note::
 
-    Python 3.6+ is preferred
+    Python 3.7+ is preferred
 
 **Installation**
 --------------------------------------
