@@ -17,6 +17,7 @@ import numpy as np
 
 from networkheatdiffusion import HeatDiffusion
 from networkheatdiffusion import HeatDiffusionError
+from networkheatdiffusion import constants
 
 
 class TestHeatDiffusion(unittest.TestCase):
@@ -33,7 +34,7 @@ class TestHeatDiffusion(unittest.TestCase):
 
     def test_diffusion_constructor(self):
         diffuser = HeatDiffusion()
-        self.assertEqual(HeatDiffusion.DEFAULT_SERVICE_ENDPOINT,
+        self.assertEqual(constants.DEFAULT_SERVICE_ENDPOINT,
                          diffuser._service_endpoint)
         self.assertEqual(360, diffuser._connect_timeout)
 
