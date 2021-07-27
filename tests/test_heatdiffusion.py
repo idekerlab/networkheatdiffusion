@@ -112,10 +112,11 @@ class TestHeatDiffusion(unittest.TestCase):
         res_cx = diffuser.run_diffusion(net_cx)
         self.assertEqual(359, len(res_cx.get_nodes()))
         self.assertEqual(481, len(res_cx.get_edges()))
-        diffuser.extract_diffused_subnetwork_by_rank(res_cx, max_rank=5,
-                                                     min_heat=0.0)
-        self.assertEqual(6, len(res_cx.get_nodes()))
-        self.assertEqual(4, len(res_cx.get_edges()))
+        filtered_cx = diffuser.extract_diffused_subnetwork_by_rank(res_cx,
+                                                                   max_rank=5,
+                                                                   min_heat=0.0)
+        self.assertEqual(6, len(filtered_cx.get_nodes()))
+        self.assertEqual(4, len(filtered_cx.get_edges()))
 
     def test_extract_diffused_subnetwork_by_rank_with_rank_correction(self):
         net_cx = ndex2.create_nice_cx_from_file(TestHeatDiffusion.TEST_NETWORK)
@@ -125,10 +126,11 @@ class TestHeatDiffusion(unittest.TestCase):
         self.assertEqual(359, len(res_cx.get_nodes()))
         self.assertEqual(481, len(res_cx.get_edges()))
 
-        diffuser.extract_diffused_subnetwork_by_rank(res_cx, max_rank=2,
-                                                     min_heat=0.0)
-        self.assertEqual(8, len(res_cx.get_nodes()))
-        self.assertEqual(6, len(res_cx.get_edges()))
+        filtered_cx = diffuser.extract_diffused_subnetwork_by_rank(res_cx,
+                                                                   max_rank=2,
+                                                                   min_heat=0.0)
+        self.assertEqual(8, len(filtered_cx.get_nodes()))
+        self.assertEqual(6, len(filtered_cx.get_edges()))
 
     def test_extract_diffused_subnetwork_by_rank_no_edge_attributes(self):
         net_cx = ndex2.create_nice_cx_from_file(TestHeatDiffusion.TEST_NETWORK)
@@ -148,10 +150,11 @@ class TestHeatDiffusion(unittest.TestCase):
         res_cx = diffuser.run_diffusion(net_cx)
         self.assertEqual(359, len(res_cx.get_nodes()))
         self.assertEqual(481, len(res_cx.get_edges()))
-        diffuser.extract_diffused_subnetwork_by_rank(res_cx, max_rank=5,
-                                                     min_heat=0.0)
-        self.assertEqual(6, len(res_cx.get_nodes()))
-        self.assertEqual(4, len(res_cx.get_edges()))
+        filtered_cx = diffuser.extract_diffused_subnetwork_by_rank(res_cx,
+                                                                   max_rank=5,
+                                                                   min_heat=0.0)
+        self.assertEqual(6, len(filtered_cx.get_nodes()))
+        self.assertEqual(4, len(filtered_cx.get_edges()))
 
     def test_add_heat(self):
         my_net = networkx.MultiGraph()
