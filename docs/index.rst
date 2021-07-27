@@ -6,16 +6,18 @@
 Welcome to Heat Diffusion Client's documentation!
 ======================================
 
+.. include:: ../README.rst
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   readme
    installation
-   usage
+   quicktutorial
    contributing
-   authorshistory
+   authors
+   history
 
 Indices and tables
 ==================
