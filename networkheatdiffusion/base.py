@@ -9,6 +9,8 @@ from scipy.sparse.linalg import expm_multiply
 from ndex2.nice_cx_network import NiceCXNetwork
 from ndex2.nice_cx_network import DefaultNetworkXFactory
 
+from networkheatdiffusion import constants
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -23,17 +25,8 @@ class HeatDiffusion(object):
     """
     Runs heat diffusion on remote service
     """
-
-    DEFAULT_SERVICE_ENDPOINT = 'http://v3.heat-diffusion.cytoscape.io'
-    DEFAULT_INPUT = 'diffusion_input'
-    DEFAULT_OUTPUT_PREFIX = 'diffusion_output'
-    DEFAULT_HEAT_SUFFIX = '_heat'
-    DEFAULT_RANK_SUFFIX = '_rank'
-    DEFAULT_HEAT = DEFAULT_OUTPUT_PREFIX + DEFAULT_HEAT_SUFFIX
-    DEFAULT_RANK = DEFAULT_OUTPUT_PREFIX + DEFAULT_RANK_SUFFIX
-    DEFAULT_DATA_TYPE = numpy.float64
-
-    def __init__(self, service_endpoint=None, connect_timeout=360):
+    def __init__(self, service_endpoint=constants.DEFAULT_SERVICE_ENDPOINT,
+                 connect_timeout=360):
         """
         Constructor
 
@@ -45,8 +38,7 @@ class HeatDiffusion(object):
         self._connect_timeout = connect_timeout
         self._service_endpoint = service_endpoint
         if self._service_endpoint is None:
-            self._service_endpoint = HeatDiffusion\
-                .DEFAULT_SERVICE_ENDPOINT
+            self._service_endpoint = constants.DEFAULT_SERVICE_ENDPOINT
         else:
             LOGGER.debug('Using custom service endpoint: ' +
                          self._service_endpoint)
@@ -60,10 +52,10 @@ class HeatDiffusion(object):
         """
         if normalize:
             return csc_matrix(networkx.normalized_laplacian_matrix(network),
-                              dtype=HeatDiffusion.DEFAULT_DATA_TYPE)
+                              dtype=constants.DEFAULT_DATA_TYPE)
         else:
             return csc_matrix(networkx.laplacian_matrix(network),
-                              dtype=HeatDiffusion.DEFAULT_DATA_TYPE)
+                              dtype=constants.DEFAULT_DATA_TYPE)
 
     def _diffuse(self, matrix, heat_array, time):
         """
@@ -74,8 +66,8 @@ class HeatDiffusion(object):
         :return:
         """
         return expm_multiply(-matrix, heat_array,
-                          start=0, stop=time,
-                          endpoint=True)[-1]
+                             start=0, stop=time,
+                             endpoint=True)[-1]
 
     def _find_heat(self, network, heat_key):
         """
@@ -97,7 +89,7 @@ class HeatDiffusion(object):
             heat_list.append(network.nodes[node_id].get(heat_key, 0))
         if not found_heat:
             raise HeatDiffusionError('No input heat found')
-        return numpy.array(heat_list, dtype=HeatDiffusion.DEFAULT_DATA_TYPE)
+        return numpy.array(heat_list, dtype=constants.DEFAULT_DATA_TYPE)
 
     def _add_heat(self, network, heat_array,
                   correct_rank=False):
@@ -151,8 +143,8 @@ class HeatDiffusion(object):
         return node_heat, node_rank
 
     def _add_diffusion_dict_to_network(self, cxnetwork, node_heat, node_rank,
-                                       heat_col_name=DEFAULT_HEAT,
-                                       rank_col_name=DEFAULT_RANK):
+                                       heat_col_name=constants.DEFAULT_HEAT,
+                                       rank_col_name=constants.DEFAULT_RANK):
         """
         Adds heat and rank as node attributes to 'cxnetwork' network
 
@@ -183,8 +175,8 @@ class HeatDiffusion(object):
 
     def run_diffusion(self, cxnetwork, time_param=0.1,
                       normalize_laplacian=False,
-                      input_col_name=DEFAULT_INPUT,
-                      output_prefix=DEFAULT_OUTPUT_PREFIX,
+                      input_col_name=constants.DEFAULT_INPUT,
+                      output_prefix=constants.DEFAULT_OUTPUT_PREFIX,
                       correct_rank=False,
                       via_service=False,
                       service_read_timeout=360):
@@ -199,21 +191,17 @@ class HeatDiffusion(object):
         :type time_param: int
         :param normalize_laplacian: If `True`, will create a normalized
                                     laplacian matrix for diffusion.
-                                    `None` denotes default of `False`
         :type normalize_laplacian: bool
         :param input_col_name: Name of node attribute that contains
                                diffusion heat inputs which should
                                be double values between `0.0` and
                                `1.0` where `1.0` is maximum heat
                                (seed) and 0.0 is minimum.
-                               `None` denotes default
-                               input column name of `diffusion_input`
         :type input_col_name: str
         :param output_prefix: Prefix name for diffusion output attached
                               to each node. Each
                               node will get <PREFIX>_rank and
-                              <PREFIX>_heat. `None` denotes
-                              default prefix of `diffusion_output`
+                              <PREFIX>_heat.
         :type output_prefix: str
         :param correct_rank: If True, multiple nodes that have same heat
                              will have same rank. NOTE: This only works
@@ -229,7 +217,7 @@ class HeatDiffusion(object):
         :type service_read_timeout: int
         :raises HeatDiffusionError: If there is an error
         :return: network passed in with diffusion columns added
-        :rtype: `:py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
+        :rtype: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         """
         if via_service is not None and via_service is True:
             if correct_rank is True:
@@ -359,10 +347,10 @@ class HeatDiffusion(object):
             params['time'] = time_param
         if normalize_laplacian is not None and normalize_laplacian is True:
             params['normalize_laplacian'] = True
-        if input_col_name is not None and input_col_name != HeatDiffusion.DEFAULT_INPUT:
+        if input_col_name is not None and input_col_name != constants.DEFAULT_INPUT:
             params['input_attribute_name'] = input_col_name
 
-        if output_prefix is not None and output_prefix != HeatDiffusion.DEFAULT_OUTPUT_PREFIX:
+        if output_prefix is not None and output_prefix != constants.DEFAULT_OUTPUT_PREFIX:
             params['output_attribute_name'] = output_prefix
 
         return params
@@ -378,11 +366,11 @@ class HeatDiffusion(object):
         :return:
         """
         if diffusion_output_prefix is None:
-            o_prefix = HeatDiffusion.DEFAULT_OUTPUT_PREFIX
+            o_prefix = constants.DEFAULT_OUTPUT_PREFIX
         else:
             o_prefix = diffusion_output_prefix
-        rank_col = o_prefix + HeatDiffusion.DEFAULT_RANK_SUFFIX
-        heat_col = o_prefix + HeatDiffusion.DEFAULT_HEAT_SUFFIX
+        rank_col = o_prefix + constants.DEFAULT_RANK_SUFFIX
+        heat_col = o_prefix + constants.DEFAULT_HEAT_SUFFIX
 
         LOGGER.debug('Appending diffusion output to network')
         for aspect in diff_res['data']:
@@ -406,26 +394,36 @@ class HeatDiffusion(object):
 
     @staticmethod
     def add_seed_nodes_by_node_name(cxnetwork, seed_nodes=None,
-                                    diffusion_col_name=None):
+                                    diffusion_col_name=constants.
+                                    DEFAULT_INPUT):
         """
-        Adds seed nodes by node name. This is done by adding a
-        node attribute named by 'diffusion_col_name' :parameter
-        or if that is `None` then `HeatDiffusion.DEFAULT_INPUT` is
-        used
+        Adds seed nodes by node name to `cxnetwork` in place.
+
+        This is done by adding a node attribute named by
+        `diffusion_col_name` parameter and setting
+        it to a value of ``1.0`` or to
+        values dictated by `seednodes` parameter if `seednodes`
+        is a :py:func:`dict`
 
         :param cxnetwork: network to update
         :type cxnetwork: :py:class:`ndex2.nice_cx_network.NiceCXNetwork`
-        :param seednodes: if this is a :py:func:`list` then the value of the node
-                          attribute is set to `1.0`. If :py:func:`dict` then list of node names or dict of node names
+        :param seednodes: if this is a :py:class:`~python.list` then the value of the node
+                          attribute is set to `1.0`. If :py:class:`~python.library.dict` then
+                          code assumes key of :py:class:`~python.dict` is node name and
+                          value is desired value to set for node attribute value
+                          named by `diffusion_col_name` parameter.
         :type seed_nodes: list or dict
-        :param diffusion_col_name:
-        :return:
+        :param diffusion_col_name: Name of 'diffusion_col_name' parameter.
+                                   If ``None``
+                                   :py:const:`~networkheatdiffusion.constants.DEFAULT_INPUT`
+                                   is used
+        :return: None
         """
         if cxnetwork is None:
             raise HeatDiffusionError('Input network cannot be None')
 
         if diffusion_col_name is None:
-            diffusion_col_name = HeatDiffusion.DEFAULT_INPUT
+            diffusion_col_name = constants.DEFAULT_INPUT
 
         if isinstance(seed_nodes, list) is True:
             seed_nodes_list = seed_nodes
@@ -449,21 +447,36 @@ class HeatDiffusion(object):
                                              type='double')
 
     @staticmethod
-    def extract_diffused_subnetwork_by_rank(cx_network, max_rank=None,
-                                            rank_col=None, min_heat=None,
-                                            heat_col=None,
+    def extract_diffused_subnetwork_by_rank(cx_network,
+                                            heat_col=constants.DEFAULT_HEAT,
+                                            rank_col=constants.DEFAULT_RANK,
+                                            max_rank=None,
+                                            min_heat=None,
                                             include_seeds=False,
                                             seed_col=None):
         """
-        Given a network 'cx_network' where diffusion has been run. This
+        .. warning::
+
+            TODO THIS METHOD NEEDS TO MAKE A NEW NETWORK AND NOT CHANGE
+             THE NETWORK PASSED IN.
+
+        Given a network `cx_network` where diffusion has been run. This
         method extracts a sub network containing nodes that have a
-        rank equal or less then value of 'by_max_rank' as well as all edges
+        rank equal or less then value of `max_rank` and a heat equal or greater
+        then `min_heat` as well as all edges
         connecting those nodes.
 
         :param cx_network: Network where diffusion has been run
         :type cx_network: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
-        :param by_max_rank: Keep nodes with rank of this or lower
-        :type by_max_rank: int
+        :param heat_col: Heat attribute name
+        :type heat_col: str
+        :param rank_col: Rank attribute name
+        :type rank_col: str
+        :param max_rank: If not ``None``, keep nodes with rank of this or lower
+        :type max_rank: int
+        :param min_heat: If not ``None``, keep nodes with heat of this value
+                         or greater
+        :type min_heat: float
         :param include_seeds: If set to `True` also include any nodes where
                              diffusion_input attribute is greater then 0.0
         :type include_seeds: bool
@@ -471,11 +484,11 @@ class HeatDiffusion(object):
         :rtype: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         """
         if rank_col is None:
-            rank_col = HeatDiffusion.DEFAULT_RANK
+            rank_col = constants.DEFAULT_RANK
         if heat_col is None:
-            heat_col = HeatDiffusion.DEFAULT_HEAT
+            heat_col = constants.DEFAULT_HEAT
         if seed_col is None:
-            seed_col = HeatDiffusion.DEFAULT_INPUT
+            seed_col = constants.DEFAULT_INPUT
 
         nodes_to_remove = set()
         for node_id, node_obj in cx_network.get_nodes():
