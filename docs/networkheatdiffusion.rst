@@ -1,22 +1,20 @@
 networkheatdiffusion package
 =============================
 
-Submodules
-------------
+Network Heat Diffusion
+-------------------------
 
-networkheatdiffusion.base module
----------------------------------
 
-.. automodule:: networkheatdiffusion.base
+.. autoclass:: networkheatdiffusion.base.HeatDiffusion
     :members:
     :undoc-members:
     :show-inheritance:
 
 
-Module contents
+Exceptions
 ----------------
 
-.. automodule:: networkheatdiffusion
+.. autoclass:: networkheatdiffusion.base.HeatDiffusionError
     :members:
     :undoc-members:
     :show-inheritance:
