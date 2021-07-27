@@ -13,6 +13,7 @@ Contents:
 
    installation
    quicktutorial
+   modules
    contributing
    authors
    history
