@@ -12,7 +12,7 @@ To install Heat Diffusion Client, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install heatdiffusionclient
+    $ pip install networkheatdiffusion
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -30,13 +30,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/idekerlab/heatdiffusionclient
+    $ git clone git://github.com/idekerlab/networkheatdiffusion
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/idekerlab/heatdiffusionclient/tarball/master
+    $ curl  -OL https://github.com/idekerlab/networkheatdiffusion/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -45,5 +45,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/idekerlab/heatdiffusionclient
-.. _tarball: https://github.com/idekerlab/heatdiffusionclient/tarball/master
+.. _Github repo: https://github.com/idekerlab/networkheatdiffusion
+.. _tarball: https://github.com/idekerlab/hnetworkheatdiffusion/tarball/master
