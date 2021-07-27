@@ -1,7 +1,7 @@
-heatdiffusionclient
-===================
+networkheatdiffusion
+====================
 
 .. toctree::
    :maxdepth: 4
 
-   heatdiffusionclient
+   networkheatdiffusion
