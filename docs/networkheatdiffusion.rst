@@ -1,11 +1,11 @@
 networkheatdiffusion package
-===========================
+=============================
 
 Submodules
-----------
+------------
 
 networkheatdiffusion.base module
--------------------------------
+---------------------------------
 
 .. automodule:: networkheatdiffusion.base
     :members:
@@ -14,7 +14,7 @@ networkheatdiffusion.base module
 
 
 Module contents
----------------
+----------------
 
 .. automodule:: networkheatdiffusion
     :members:
