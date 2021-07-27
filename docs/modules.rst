@@ -1,4 +1,4 @@
-networkheatdiffusion
+Reference
 ====================
 
 .. toctree::
