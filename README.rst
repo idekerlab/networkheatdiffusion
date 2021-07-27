@@ -16,13 +16,13 @@ Overview
 -------------
 
 
-A Python package that finds network network neighborhoods in a larger
+Finds network network neighborhoods in a larger
 network relevant to an initial set of nodes of interest. It works by
 propagating the node set across the network in a process analogous
 to heat diffusing across a conductive medium. A typical application
 would be discovering network mechanisms from hits in a screen or
-differential expression analysis. More generally this service is
-applicable for paring a larger network to a smaller, more manageable
+differential expression analysis. More generally this package is
+applicable for parsing a larger network to a smaller, more manageable
 one based on known nodes of interest.
 
 This code was extracted from
@@ -36,10 +36,6 @@ Carlin DE, Demchak B, Pratt D, Sage E, Ideker T (2017)
 Network propagation in the cytoscape cyberinfrastructure.
 PLOS Computational Biology 13(10): e1005598.
 https://doi.org/10.1371/journal.pcbi.1005598
-
-
-* Free software: MIT license
-* Documentation: https://networkheatdiffusion.readthedocs.io.
 
 Dependencies
 --------------
