@@ -67,14 +67,14 @@ Index (PyPI) repository using PIP:
 
 ::
 
-    pip install ndex2
+    pip install networkheatdiffusion
 
-If you already have an older version of the ndex2 module installed, you
+If you already have an older version of the networkheatdiffusion module installed, you
 can use this command instead:
 
 ::
 
-    pip install --upgrade ndex2
+    pip install --upgrade networkheatdiffusion
 
 **License**
 --------------------------------------
