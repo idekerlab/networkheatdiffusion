@@ -26,6 +26,22 @@ To use Network Heat Diffusion in a project::
 
     diffused_network = diffuser.run_diffusion(net_cx)
 
+    print('Node,Rank,Heat')
+    for node_id, node_obj in diffused_network.get_nodes():
+        node_heat = diffused_network.get_node_attribute(node_id, 'diffusion_output_heat')
+        if node_heat is None or node_heat == (None, None):
+            continue
+        node_rank = diffused_network.get_node_attribute(node_id, 'diffusion_output_rank')
+        if node_rank is None or node_rank == (None, None):
+            continue
+        print(node_obj['n'] + ',' + str(node_rank['v']) + ',' + str(node_heat['v']))
 
 
 
+
+
+
+
+
+The above adds ``diffusion_output_heat`` and ``diffusion_output_rank`` attributes to
+nodes on network that can be used to filtered to create a sub network.
