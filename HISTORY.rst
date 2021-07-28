@@ -2,6 +2,14 @@
 History
 =======
 
+0.3.0 (2021-7-27)
+-------------------
+
+* **Breaking change**, moved constants originally in ``HeatDiffusion`` class
+  into separate ``constants`` module
+
+* Improved documentation
+
 0.2.0 (2020-08-28)
 -------------------
 
