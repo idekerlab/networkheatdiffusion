@@ -92,6 +92,34 @@ class TestHeatDiffusion(unittest.TestCase):
         res = diffuser._find_heat(my_net, 'heat')
         self.assertTrue(np.array_equal(np.array([1, 2, 0]), res))
 
+    def test_diffusion_none_passed_in_as_network(self):
+        net_cx = ndex2.nice_cx_network.NiceCXNetwork()
+        diffuser = HeatDiffusion()
+        try:
+            diffuser.run_diffusion(None)
+            self.fail('Expected HeatDiffusionError')
+        except HeatDiffusionError as he:
+            self.assertEqual('No network found', str(he))
+
+    def test_diffusion_empty_network(self):
+        net_cx = ndex2.nice_cx_network.NiceCXNetwork()
+        diffuser = HeatDiffusion()
+        try:
+            diffuser.run_diffusion(net_cx)
+            self.fail('Expected HeatDiffusionError')
+        except HeatDiffusionError as he:
+            self.assertEqual('No nodes found in network', str(he))
+
+    def test_diffusion_no_edge_network(self):
+        net_cx = ndex2.nice_cx_network.NiceCXNetwork()
+        net_cx.create_node('node1')
+        diffuser = HeatDiffusion()
+        try:
+            diffuser.run_diffusion(net_cx)
+            self.fail('Expected HeatDiffusionError')
+        except HeatDiffusionError as he:
+            self.assertEqual('No edges found in network', str(he))
+
     def test_diffusion(self):
         net_cx = ndex2.create_nice_cx_from_file(TestHeatDiffusion.TEST_NETWORK)
         diffuser = HeatDiffusion()

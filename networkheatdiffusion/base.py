@@ -215,7 +215,8 @@ class HeatDiffusion(object):
                                      from service. Only used when 'via_service' is
                                      set to `True`
         :type service_read_timeout: int
-        :raises HeatDiffusionError: If there is an error
+        :raises HeatDiffusionError: If network has no nodes and/or edges or
+                                    there is an error
         :return: network passed in with diffusion columns added
         :rtype: :py:class:`~ndex2.nice_cx_network.NiceCXNetwork`
         """
@@ -228,6 +229,15 @@ class HeatDiffusion(object):
                                                    input_col_name=input_col_name,
                                                    output_prefix=output_prefix,
                                                    service_read_timeout=service_read_timeout)
+        if cxnetwork is None:
+            raise HeatDiffusionError('No network found')
+
+        if len(cxnetwork.get_nodes()) == 0:
+            raise HeatDiffusionError('No nodes found in network')
+
+        if len(cxnetwork.get_edges()) == 0:
+            raise HeatDiffusionError('No edges found in network')
+
         netx_fac = DefaultNetworkXFactory()
         netx_graph = netx_fac.get_graph(cxnetwork, networkx_graph=networkx.MultiGraph())
         matrix = self._create_sparse_matrix(netx_graph, normalize_laplacian)
