@@ -58,19 +58,17 @@ Python 3.6+
 **Installation**
 --------------------------------------
 
-The Network Heat Diffusion module can be installed from the Python Package
-Index (PyPI) repository using PIP:
+.. code-block::
 
-::
+    # if git not installed, repo can be downloaded and unzipped
+    git clone https://github.com/idekerlab/networkheatdiffusion
 
-    pip install networkheatdiffusion
+    cd networkheatdiffusion
+    python setup.py bdist_wheel
+    pip install dist/networkheatdiffusion*whl
 
-If you already have an older version of the networkheatdiffusion module installed, you
-can use this command instead:
 
-::
-
-    pip install --upgrade networkheatdiffusion
+`Pip <https://pypi.org/project/pip>`__ install coming soon...
 
 **License**
 --------------------------------------
