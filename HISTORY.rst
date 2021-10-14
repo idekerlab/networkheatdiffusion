@@ -2,6 +2,12 @@
 History
 =======
 
+0.4.0 (2021-10-14)
+-------------------
+
+* Breaking change, passing ``None`` or a network lacking nodes and or edges into
+  ``HeatDiffusion.run_diffusion()`` will now raise a ``HeatDiffusionError``
+
 0.3.0 (2021-7-27)
 -------------------
 
